@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import json
 import numpy as np
+from mysql_data_insertion import *
 
 def transform_df(df):
     df['year']  = df['year'].astype(np.int16)
@@ -48,7 +49,7 @@ def get_aggregated_transaction_df():
 
     agg_trans_df = pd.DataFrame(data)
     transform_df(agg_trans_df)
-    print(agg_trans_df.head())
+    return agg_trans_df
 
 
 def get_map_transaction_df():
@@ -89,7 +90,7 @@ def get_map_transaction_df():
 
     map_trans_df = pd.DataFrame(data)
     transform_df(map_trans_df)
-    print(map_trans_df.head())
+    return map_trans_df
 
 def get_top_transaction_df():
     top_transaction_directory = r'C:\Phonepe\pulse\data\top\transaction\country\india\state'
@@ -130,7 +131,7 @@ def get_top_transaction_df():
 
     top_trans_df = pd.DataFrame(data)
     transform_df(top_trans_df)
-    print(top_trans_df.head())
+    return top_trans_df
     #df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce')  # Convert 'total_count' to numeric type
     #df['total_count'] = df['total_count'].fillna(0) 
     #print(df.nlargest(10, 'total_count'))
@@ -171,7 +172,7 @@ def get_aggregated_user_df():
 
     agg_user_df = pd.DataFrame(data)
     transform_df(agg_user_df)
-    print(agg_user_df.head())
+    return agg_user_df
 
 def get_map_user_df():
     map_user_directory = r'C:\Phonepe\pulse\data\map\user\hover\country\india\state'
@@ -208,7 +209,7 @@ def get_map_user_df():
 
     map_user_df = pd.DataFrame(data)
     transform_df(map_user_df)
-    print(map_user_df)
+    return map_user_df
 
 def get_top_user_df():
     top_user_directory = r'C:\Phonepe\pulse\data\top\user\country\india\state'
@@ -243,12 +244,15 @@ def get_top_user_df():
 
     top_user_df = pd.DataFrame(data)
     transform_df(top_user_df)
-    print(top_user_df)
+    return top_user_df
     
+dataframes = {
+'aggregated_transaction' : get_aggregated_transaction_df(),
+'map_transaction' : get_map_transaction_df(),
+'top_transaction' : get_top_transaction_df(),
+'aggregated_user' : get_aggregated_user_df(),
+'map_user' : get_map_user_df(),
+'top_user' : get_top_user_df()
+}
 
-get_aggregated_transaction_df()
-get_map_transaction_df()
-get_top_transaction_df()
-get_aggregated_user_df()
-get_map_user_df()
-get_top_user_df()
+insert_dataframes(dataframes)
