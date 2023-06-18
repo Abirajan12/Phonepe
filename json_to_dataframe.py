@@ -1,8 +1,16 @@
 import os
 import pandas as pd
 import json
+import numpy as np
 
-def aggregated_transaction_df():
+def transform_df(df):
+    df['year']  = df['year'].astype(np.int16)
+    df['quarter'] = df['quarter'].astype(np.int8)
+    if 'pincode' in df.columns:
+        df['pincode'] = df['pincode'].astype(float).astype(int)
+    return df
+
+def get_aggregated_transaction_df():
     aggregated_transaction_directory = r'C:\Phonepe\pulse\data\aggregated\transaction\country\india\state'
    
     data = []
@@ -38,11 +46,12 @@ def aggregated_transaction_df():
                                     }
                                     data.append(record)
 
-    df = pd.DataFrame(data)
-    print(df.head())
+    agg_trans_df = pd.DataFrame(data)
+    transform_df(agg_trans_df)
+    print(agg_trans_df.head())
 
 
-def map_transaction_df():
+def get_map_transaction_df():
     map_transaction_directory = r'C:\Phonepe\pulse\data\map\transaction\hover\country\india\state'
    
     data = []
@@ -78,11 +87,11 @@ def map_transaction_df():
                                     }
                                     data.append(record)
 
-    df = pd.DataFrame(data)
-    #print(df[(df['state'] == 'tamil-nadu') & (df['year'] == '2018') & (df['quarter'] == '3')])
-    print(df.head())
+    map_trans_df = pd.DataFrame(data)
+    transform_df(map_trans_df)
+    print(map_trans_df.head())
 
-def top_transaction_df():
+def get_top_transaction_df():
     top_transaction_directory = r'C:\Phonepe\pulse\data\top\transaction\country\india\state'
    
     data = []
@@ -102,30 +111,31 @@ def top_transaction_df():
 
                             for pincode in json_data['data']['pincodes']:
                                 pincode_num = pincode['entityName']
-                                metric = pincode['metric']
-                                total_count = metric['count']
-                                total_amount = metric['amount']
-                                #print (district_name, total_count,total_amount)
+                                if pincode_num is not None:
+                                    metric = pincode['metric']
+                                    total_count = metric['count']
+                                    total_amount = metric['amount']
+                                    #print (district_name, total_count,total_amount)
 
-                                record = {
-                                        'state'  : state_folder,
-                                        'year'   : year_folder,
-                                        'quarter': quarter_file[0],
-                                        'pincode': pincode_num,
-                                        'total_count': total_count,
-                                        'total_amount': total_amount
+                                    record = {
+                                            'state'  : state_folder,
+                                            'year'   : year_folder,
+                                            'quarter': quarter_file[0],
+                                            'pincode': pincode_num,
+                                            'total_count': total_count,
+                                            'total_amount': total_amount
 
-                                    }
-                                data.append(record)
+                                        }
+                                    data.append(record)
 
-    df = pd.DataFrame(data)
-    #print(df[(df['state'] == 'tamil-nadu') & (df['year'] == '2018') & (df['quarter'] == '3')])
-    print(df.head())
+    top_trans_df = pd.DataFrame(data)
+    transform_df(top_trans_df)
+    print(top_trans_df.head())
     #df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce')  # Convert 'total_count' to numeric type
     #df['total_count'] = df['total_count'].fillna(0) 
     #print(df.nlargest(10, 'total_count'))
 
-def aggregated_user_df():
+def get_aggregated_user_df():
     aggregated_user_directory = r'C:\Phonepe\pulse\data\aggregated\user\country\india\state'
    
     data = []
@@ -159,10 +169,11 @@ def aggregated_user_df():
                                     }
                                     data.append(record)
 
-    df = pd.DataFrame(data)
-    print(df.head())
+    agg_user_df = pd.DataFrame(data)
+    transform_df(agg_user_df)
+    print(agg_user_df.head())
 
-def map_user_df():
+def get_map_user_df():
     map_user_directory = r'C:\Phonepe\pulse\data\map\user\hover\country\india\state'
    
     data = []
@@ -195,10 +206,11 @@ def map_user_df():
                                     }
                                 data.append(record)
 
-    df = pd.DataFrame(data)
-    print(df)
+    map_user_df = pd.DataFrame(data)
+    transform_df(map_user_df)
+    print(map_user_df)
 
-def top_user_df():
+def get_top_user_df():
     top_user_directory = r'C:\Phonepe\pulse\data\top\user\country\india\state'
    
     data = []
@@ -229,14 +241,14 @@ def top_user_df():
                                     }
                                 data.append(record)
 
-    df = pd.DataFrame(data)
-    #print(df[(df['state'] == 'tamil-nadu') & (df['year'] == '2018') & (df['quarter'] == '3')])
-    print(df)
+    top_user_df = pd.DataFrame(data)
+    transform_df(top_user_df)
+    print(top_user_df)
     
 
-#aggregated_transaction_df()
-#map_transaction_df()
-#top_transaction_df()
-#aggregated_user_df()
-#map_user_df()
-top_user_df()
+get_aggregated_transaction_df()
+get_map_transaction_df()
+get_top_transaction_df()
+get_aggregated_user_df()
+get_map_user_df()
+get_top_user_df()
