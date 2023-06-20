@@ -2,9 +2,16 @@ import streamlit as st
 from mysql_data_retrieval import *
 
 def main():
-    st.title("PhonePe pulse")
-    st.sidebar.selectbox("All India",('Transaction', 'User'))
-    st.sidebar.selectbox('Year',get_years())
+    st.set_page_config(page_title="Abi's,PhonePe Pulse 2.0", page_icon=':telephone_receiver:',layout = 'wide')
+    with st.container():
+        st.title("PhonePe pulse 2.0")
+        st.write("An user friendly dashboard mimicking the Phonepe Pulse")
+    type = st.sidebar.radio("All India",('Transaction', 'User'))
+    year = int(st.sidebar.selectbox('Year',get_years()))
+    quarter = int((st.sidebar.radio('Quarter',('Q1','Q2','Q3','Q4')))[-1])
+    print(year)
+    print(quarter)
+    
     col1, col2 = st.columns(2)
 
     with col1:
