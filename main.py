@@ -99,16 +99,11 @@ def main():
                 quarter = '('+', '.join(str(value) for value in quarter)+')'
 
         query_List = ['Drag to choose query','State and Total count of Phonepe Transactions',
-                      'States and their percentage of phonepe users',
-                      'State with more users with Apple',
-                      'Bottom 10 States with Xiaomi users',
-                      'Users count in year/quarter',
-                      'High number of registered users among states',
-                      'Count of app opens in a particular district',
-                      'No of Registered users, app opens in a particular quarter and particular year',
-                      'Districts with less number of Registed Users',
-                      'Top 10 states which has less number customers',
-                      'Pincodes with maximum registered users']
+                      'States - Total Amount of Phone Pe Transactions',
+                      'States - Total count of Users',
+                      'States - Percentage of Users',
+                      'States - Registered Users',
+                      'States - App Opens']
         query = st.selectbox('Select the Query ',query_List)
         if year and quarter:
             df,fig = get_Geo_Json_Result(query,year,quarter)
@@ -120,7 +115,6 @@ def main():
                     st.plotly_chart(fig)
         else:
             st.markdown(""":red[Please choose year/quarter]""")    
-
 
 if __name__ == "__main__":
     main()

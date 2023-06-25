@@ -375,20 +375,50 @@ def get_changed_state_names():
         table_state_names = [row[0] for row in rows]
         return table_state_names
 
-def get_Geo_Query_Result(query,year, quarter,state_names):
-    if query == 'State':
-        with create_connection() as connection:
-            cursor = connection.cursor()
-            query = f"SELECT state, sum(total_count) as sum_of_total_count\
+def get_Geo_Query(query_word, year, quarter):
+    if query_word == 'Statecount':
+        query = f"SELECT state, sum(total_count) as sum_of_total_count\
                     FROM aggregated_transaction \
                     WHERE year in {year} AND quarter IN {quarter}\
                     GROUP BY state"
-            cursor.execute(query)
-            column_names = [description[0] for description in cursor.description]
-            rows = cursor.fetchall()
-            df = pd.DataFrame(rows, columns=column_names)
-            table_state_names = get_changed_state_names()
+    elif query_word == 'Stateamount':
+        query = f"SELECT state, sum(total_amount) as sum_of_total_amount\
+                    FROM aggregated_transaction \
+                    WHERE year in {year} AND quarter IN {quarter}\
+                    GROUP BY state"
+    elif query_word == 'Stateusercount':
+        query = f"SELECT state, sum(total_count) as sum_of_total_count\
+                    FROM aggregated_user \
+                    WHERE year in {year} AND quarter IN {quarter}\
+                    GROUP BY state"
+    elif query_word == 'Stateuserpercent':
+        query = f"SELECT state, sum(percentage) as sum_of_percent\
+                    FROM aggregated_user \
+                    WHERE year in {year} AND quarter IN {quarter}\
+                    GROUP BY state"
+    elif query_word == 'Statereguser':
+        query = f"SELECT state, sum(registered_users) as total_reg_users\
+                    FROM map_user \
+                    WHERE year in {year} AND quarter IN {quarter}\
+                    GROUP BY state"
+    elif query_word == 'Stateappopens':
+        query = f"SELECT state, sum(app_opens) as total_app_opens\
+                    FROM map_user \
+                    WHERE year in {year} AND quarter IN {quarter}\
+                    GROUP BY state"
+    return query
 
-            for i in range(len(table_state_names)):
-                df['state'] = df['state'].replace({table_state_names[i]: state_names[i]})
-        return df
+def get_Geo_Query_Result(query_word,year, quarter,state_names):
+    with create_connection() as connection:
+        cursor = connection.cursor()
+        query = get_Geo_Query(query_word, year, quarter)
+        cursor.execute(query)
+        column_names = [description[0] for description in cursor.description]
+        rows = cursor.fetchall()
+        df = pd.DataFrame(rows, columns=column_names)
+        table_state_names = get_changed_state_names()
+
+        for i in range(len(table_state_names)):
+            df['state'] = df['state'].replace({table_state_names[i]: state_names[i]})
+    return df
+    
