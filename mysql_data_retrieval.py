@@ -206,69 +206,83 @@ def get_Transaction_Query_Result(query, year, quarter):
     
 def get_User_Query_Result(query, year, quarter):
     if query == 'Drag to choose query':
-        return None
+        return None, None
 
     elif query == 'Total count of users with repect to user device':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f"SELECT user_device, sum(total_count) \
+            query = f"SELECT year,user_device, sum(total_count) as Total_users \
+                    FROM aggregated_user \
+                    WHERE year IN {year}  AND quarter IN {quarter} \
+                    GROUP BY year, user_device \
+                    ORDER BY year, sum(total_count);"
+            cursor.execute(query)
+            column_names = [description[0] for description in cursor.description]
+            rows = cursor.fetchall()
+            df = pd.DataFrame(rows, columns=column_names)
+            fig = go.Figure()
+            for y in df['year'].unique():
+                df_year = df[df['year'] == y]
+                fig.add_trace(go.Bar(x=df_year['user_device'], y=df_year['Total_users'],name=str(y)))        
+            fig.update_layout(barmode='group', title='Device- wise Phonepe users')
+        return df, fig
+    
+    elif query == 'Bottom 5 User Devices and its percentage of phonepe users':
+        with create_connection() as connection:
+            cursor = connection.cursor()
+            query = f'SELECT user_device, sum(percentage) sum_of_percent \
                     FROM aggregated_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY user_device \
-                    ORDER BY sum(total_count) DESC;"
+                    ORDER BY sum(percentage) \
+                    LIMIT 5;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
-    
-    elif query == 'States and their percentage of phonepe users':
-        with create_connection() as connection:
-            cursor = connection.cursor()
-            query = f'SELECT state, sum(percentage) \
-                    FROM aggregated_user \
-                    WHERE year IN {year}  AND quarter IN {quarter} \
-                    GROUP BY state \
-                    ORDER BY sum(percentage) DESC;'
-            cursor.execute(query)
-            column_names = [description[0] for description in cursor.description]
-            rows = cursor.fetchall()
-            df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#FF1493','#FFA500','#9400D3','#32CD32','#0000FF']
+            fig = go.Figure(data=go.Bar(x=df['user_device'], y=df['sum_of_percent'],marker=dict(color=colors)))
+            fig.update_layout(title='Users Device vs Percentage of Phonepe users', xaxis_title='User Device', yaxis_title='Sum of Percentage')
+        return df,fig
     
     elif query == 'State with more users with Apple':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state, sum(total_count) \
+            query = f'SELECT state, sum(total_count) as Sum_of_Apple_users\
                     FROM aggregated_user \
                     WHERE year IN {year}  AND quarter IN {quarter} AND user_device = "Apple" \
                     GROUP BY state \
-                    ORDER BY sum(total_count) DESC;'
+                    ORDER BY sum(total_count) DESC \
+                    LIMIT 5;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#8B0000','#9400D3','#FF4500','#FFC0CB','#BDB76B']
+            fig = go.Figure(data=go.Pie(labels=df['state'], values=df['Sum_of_Apple_users'],marker=dict(colors=colors)))
+        return df,fig
     
     elif query == 'Bottom 10 States with Xiaomi users':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state, sum(total_count) \
+            query = f'SELECT state, sum(total_count) as sum_of_xiaomi_users\
                     FROM aggregated_user \
                     WHERE year IN {year}  AND quarter IN {quarter} AND user_device = "Xiaomi" \
                     GROUP BY state \
-                    ORDER BY sum(total_count) \
+                    ORDER BY sum(total_count) DESC \
                     LIMIT 10;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#7B68EE','#DAA520','#87CEFA','#663399','#008080','#DFFF00','#F08080','#DE3163','#40E0D0','#CCCCFF']
+            fig = go.Figure(data=go.Pie(labels=df['state'], values=df['sum_of_xiaomi_users'],marker=dict(colors=colors)))
+        return df,fig
     
     elif query == 'Users count in year/quarter':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT year, quarter,sum(total_count) \
+            query = f'SELECT year, quarter,sum(total_count) as sum_of_total_count\
                     FROM aggregated_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY year, quarter \
@@ -277,40 +291,52 @@ def get_User_Query_Result(query, year, quarter):
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#D8BFD8','#FFA500','#FFDAB9','#32CD32','#0000FF','#DDA0DD','#7FFF00','#008000','#008B8B','#ADD8E6']
+            x_labels = [f"{year} - {quarter}" for year, quarter in zip(df['year'], df['quarter'])]
+            fig = go.Figure(data=go.Pie(labels=x_labels, values=df['sum_of_total_count'],marker=dict(colors=colors)))
+        return df,fig
     
     elif query == 'High number of registered users among states':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state, sum(registered_users) \
+            query = f'SELECT state, sum(registered_users) as sum_of_registered_users \
                     FROM map_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY state \
-                    ORDER BY sum(registered_users) DESC;'
+                    ORDER BY sum(registered_users) DESC \
+                    LIMIT 10;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#FF1493','#FFA500','#9400D3','#32CD32','#0000FF','#87CEEB','#DAA520','#A52A2A','#FFE4E1','#2F4F4F']
+            fig = go.Figure(data=go.Bar(x=df['state'], y=df['sum_of_registered_users'],marker=dict(color=colors)))
+            fig.update_layout(title='States with High number of Registered Users', xaxis_title='State', yaxis_title='Total Registered Users')
+        return df,fig
     
     elif query == 'Count of app opens in a particular district':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state,district, sum(app_opens) \
+            query = f'SELECT state,district, sum(app_opens) as sum_of_app_opens \
                     FROM map_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY state,district \
-                    ORDER BY sum(app_opens) DESC;'
+                    ORDER BY sum(app_opens) DESC \
+                    LIMIT 10;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            x_labels = [f"{state} - {district}" for state, district in zip(df['state'], df['district'])]
+            fig = go.Figure(data=go.Bar(x=x_labels, y=df['sum_of_app_opens']))
+            fig.update_layout(title='Count of app opens in a particular district',
+                              xaxis_title='State - District', yaxis_title='Total App Opens')
+        return df,fig
     
     elif query == 'No of Registered users, app opens in a particular quarter and particular year':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT year, quarter,sum(registered_users),sum(app_opens) \
+            query = f'SELECT year, quarter,sum(registered_users) as total_registered_users,sum(app_opens) as total_app_opens\
                     FROM map_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY year, quarter \
@@ -319,12 +345,23 @@ def get_User_Query_Result(query, year, quarter):
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            fig = go.Figure(data=[
+            go.Bar(x=df['quarter'], y=df['total_registered_users'], name='Registered Users'),
+            go.Bar(x=df['quarter'], y=df['total_app_opens'], name='App Opens')
+        ])
+        
+            fig.update_layout(
+            barmode='group',
+            title='Number of Registered Users and App Opens in a Quarter and Year',
+            xaxis_title='Quarter',
+            yaxis_title='Count'
+        )
+        return df,fig
     
     elif query == 'Districts with less number of Registed Users':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state,district, sum(registered_users) \
+            query = f'SELECT state,district, sum(registered_users) as sum_of_reg_users \
                     FROM map_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY state,district \
@@ -334,12 +371,15 @@ def get_User_Query_Result(query, year, quarter):
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#7B68EE','#00FF00','#6A5ACD','#808000','#9400D3']
+            x_labels = [f"{state} - {district}" for state, district in zip(df['state'], df['district'])]
+            fig = go.Figure(data=go.Pie(labels=x_labels, values=df['sum_of_reg_users'],marker=dict(colors=colors)))
+        return df,fig
     
     elif query == 'Top 10 states which has less number customers':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state, sum(registered_users) \
+            query = f'SELECT state, sum(registered_users) as sum_of_registered_users \
                     FROM top_user \
                     WHERE year IN {year} AND quarter IN {quarter} \
                     GROUP BY state \
@@ -349,22 +389,28 @@ def get_User_Query_Result(query, year, quarter):
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#DFFF00','#BDB76B','#F08080','#D8BFD8','#FFFF00','#DE3163','#FF6347','#40E0D0','#CCCCFF','#C71585']
+            fig = go.Figure(data=go.Bar(x=df['state'], y=df['sum_of_registered_users'],marker=dict(color=colors)))
+            fig.update_layout(title='Top 10 states which has less number customers', xaxis_title='State', yaxis_title='Total Registered Users')
+        return df,fig
     
     elif query == 'Pincodes with maximum registered users':
         with create_connection() as connection:
             cursor = connection.cursor()
-            query = f'SELECT state, pincode,sum(registered_users) \
+            query = f'SELECT state, pincode,sum(registered_users) as sum_of_reg_users \
                     FROM top_user \
                     WHERE year IN {year}  AND quarter IN {quarter} \
                     GROUP BY state,pincode \
                     ORDER BY sum(registered_users) DESC \
-                    LIMIT 10;'
+                    LIMIT 5;'
             cursor.execute(query)
             column_names = [description[0] for description in cursor.description]
             rows = cursor.fetchall()
             df = pd.DataFrame(rows, columns=column_names)
-        return df
+            colors = ['#D8BFD8','#FFA500','#FFDAB9','#32CD32','#0000FF']
+            x_labels = [f"{state} - {pincode}" for state, pincode in zip(df['state'], df['pincode'])]
+            fig = go.Figure(data=go.Pie(labels=x_labels, values=df['sum_of_reg_users'],marker=dict(colors=colors)))
+        return df,fig
 
 def get_changed_state_names():
     with create_connection() as connection:

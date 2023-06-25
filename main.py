@@ -67,7 +67,7 @@ def main():
                 usr_quarter = '('+', '.join(str(value) for value in usr_quarter)+')'
 
         user_Query_List = ['Drag to choose query','Total count of users with repect to user device',
-                      'States and their percentage of phonepe users',
+                      'Bottom 5 User Devices and its percentage of phonepe users',
                       'State with more users with Apple',
                       'Bottom 10 States with Xiaomi users',
                       'Users count in year/quarter',
@@ -79,9 +79,13 @@ def main():
                       'Pincodes with maximum registered users']
         usr_query = st.selectbox('Select the Query ',user_Query_List)
         if usr_year and usr_quarter:
-            usr_query_df = get_User_Query_Result(usr_query,usr_year,usr_quarter)
-            if usr_query_df is not None:
-                st.dataframe(usr_query_df)
+            usr_query_df, usr_query_fig = get_User_Query_Result(usr_query,usr_year,usr_quarter)
+            if usr_query_df is not None and usr_query_fig is not None:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.dataframe(usr_query_df)
+                with col2:
+                    st.plotly_chart(usr_query_fig)
         else:
             st.markdown(""":red[Please choose year/quarter]""")    
 
