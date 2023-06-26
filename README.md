@@ -90,4 +90,4 @@ information and insights from the Phonepe pulse Github repository in an interact
 
 ## 9. Demo
 
-[PhonePe Pulse 2.0 Demo link](https://github.com/PhonePe/pulse#readme)
+[PhonePe Pulse 2.0 Demo link](https://www.linkedin.com/posts/abirami-rengarajan-4b017b27a_phonepepulse-datascience-visualization-activity-7079003576873730048-Noz9?utm_source=share&utm_medium=member_desktop)
