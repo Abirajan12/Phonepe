@@ -132,9 +132,6 @@ def get_top_transaction_df():
     top_trans_df = pd.DataFrame(data)
     transform_df(top_trans_df)
     return top_trans_df
-    #df['total_count'] = pd.to_numeric(df['total_count'], errors='coerce')  # Convert 'total_count' to numeric type
-    #df['total_count'] = df['total_count'].fillna(0) 
-    #print(df.nlargest(10, 'total_count'))
 
 def get_aggregated_user_df():
     aggregated_user_directory = r'C:\Phonepe\pulse\data\aggregated\user\country\india\state'
