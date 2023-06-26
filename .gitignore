@@ -1,2 +1,6 @@
 /pulse/*
 /__pycache__/*
+__pycache__/*
+__pycache__/*.pyc
+__pycache__/mysql_data_retrieval.cpython-311.pyc
+__pycache__/mysql_data_insertion.cpython-311.pyc
